@@ -4,29 +4,36 @@
 
 #define MATH_PI 3.1415926535
 
-typedef struct Side Side;
 
 struct Side{
 	_Bool taken;
 	unsigned color;
-	Side* adjacentSide;
+	struct Side* adjacentSide;
 };
 
-typedef struct{
+struct Cube{
 	struct Side* sides;
-}Cube;
+};
 
 void generateCube(){
-	struct Cube* cubes = (Cube*)malloc(sizeof(Cube) * 100);
+	struct Cube* cubes = (struct Cube*)malloc(sizeof(struct Cube) * 100);
 	unsigned cubeIndex = 0;
 	unsigned sideIndex = 1;
 	for(cubeIndex = 0; cubeIndex < 100; ++cubeIndex){
-		*cubes->sides = (Side*)malloc(sizeof(Side)*3);
-		*cubes->sides[0].color = (1 + (floor(sideIndex++ * MATH_PI)%100));
-		*cubes->sides[1].color = (1 + (floor(sideIndex++ * MATH_PI)%100));
-		*cubes->sides[2].color = (1 + (floor(sideIndex++ * MATH_PI)%100));
+		cubes->sides = (struct Side*)malloc(sizeof(struct Side)*3);
+		cubes->sides[0].color = (1 + ((int)floor(sideIndex++ * MATH_PI)%100));
+		cubes->sides[1].color = (1 + ((int)floor(sideIndex++ * MATH_PI)%100));
+		cubes->sides[2].color = (1 + ((int)floor(sideIndex++ * MATH_PI)%100));
+		cubes += sizeof(struct Cube);
 	}
 
+	struct Cube* end = &cubes[99];
+	cubes = &cubes[0];
+
+	while(cubes != end){
+		printf("%i", cubes->sides[0].color);
+		cubes += sizeof(struct Cube);
+	}
 }
 
 
