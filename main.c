@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 
 #define MATH_PI 3.1415926535
@@ -19,23 +19,24 @@ void generateCube(){
 	struct Cube* cubes = (struct Cube*)malloc(sizeof(struct Cube) * 100);
 	unsigned cubeIndex = 0;
 	unsigned sideIndex = 1;
+	struct Cube* cubeIterator = cubes;
+
 	for(cubeIndex = 0; cubeIndex < 100; ++cubeIndex){
-		cubes->sides = (struct Side*)malloc(sizeof(struct Side)*3);
-		cubes->sides[0].color = (1 + ((int)floor(sideIndex++ * MATH_PI)%100));
-		cubes->sides[1].color = (1 + ((int)floor(sideIndex++ * MATH_PI)%100));
-		cubes->sides[2].color = (1 + ((int)floor(sideIndex++ * MATH_PI)%100));
-		cubes += sizeof(struct Cube);
+		cubeIterator->sides = (struct Side*)malloc(sizeof(struct Side)*3);
+		cubeIterator->sides[0].color = (1 + ((int)floor(sideIndex++ * MATH_PI)%100));
+		cubeIterator->sides[1].color = (1 + ((int)floor(sideIndex++ * MATH_PI)%100));
+		cubeIterator->sides[2].color = (1 + ((int)floor(sideIndex++ * MATH_PI)%100));
+		cubeIterator += sizeof(struct Cube);
 	}
 
-	struct Cube* end = &cubes[99];
-	cubes = &cubes[0];
-
-	while(cubes != end){
-		printf("%i", cubes->sides[0].color);
-		cubes += sizeof(struct Cube);
+	struct Cube* end = &(cubes + (sizeof(struct Cube) * 99));
+	cubeIterator = cubes;
+	printf("%i", cubeIterator->sides[2].color);
+	while(cubeIterator != end){
+		printf("%i", cubeIterator->sides[0].color);
+		cubeIterator += sizeof(struct Cube);
 	}
 }
-
 
 int main(){
 	generateCube();
