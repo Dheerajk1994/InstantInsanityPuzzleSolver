@@ -80,17 +80,16 @@ bool tryToSolvePuzzle(Cube** cubes, Cube* currentCube, Cube* end, int* colorArra
 		}
 		else{
 			printf("recursive try to solve called\n");
-			//printf("%d\n", colorArray[currentCube->sides[0].color]);
-			tryToSolvePuzzle(cubes, currentCube + sizeof(Cube), end, colorArray);
-			//if(!currentCube->sides[0].taken && colorArray[currentCube->sides[0].color - 1] + 1 == 1){
+			printf("%d\n", colorArray[currentCube->sides[0].color]);
+			//if(!currentCube->sides[0].taken && colorArray[currentCube->sides[0].color + 1] + 1 == 1){
 			//	printf("inside first check");
 			//	currentCube->sides[0].taken = true;
-			//	colorArray[currentCube->sides[0].color - 1] = 1;
+			//	colorArray[currentCube->sides[0].color + 1] = 1;
 			//	if(tryToSolvePuzzle(cubes, currentCube + sizeof(Cube), end, colorArray)){
 			//		return true;
 			//	}
 			//	currentCube->sides[0].taken = false;
-			//	colorArray[currentCube->sides[0].color - 1] = 0;
+			//	colorArray[currentCube->sides[0].color + 1] = 0;
 			//}
 			//if(!currentCube->sides[1].taken&& colorArray[currentCube->sides[1].color + 1] + 1 == 1){
 			//	currentCube->sides[1].taken = true;
@@ -149,8 +148,8 @@ int main(){
 
 	printPuzzleSetToFile((Cube const**) &puzzleSet1, "Puzzle 1", "cubes.txt", "w");
 	Cube* currentCube = NULL;
-	currentCube = puzzleSet1;
-	tryToSolvePuzzle(&puzzleSet1, currentCube, puzzleSet1 + sizeof(Cube) * NUMBER_OF_CUBES, colorArray);
+	currentCube = &puzzleSet1;
+	//tryToSolvePuzzle(&puzzleSet1, currentCube, puzzleSet1 + sizeof(Cube) * NUMBER_OF_CUBES, colorArray);
 
 	//freeUpMemory(&puzzleSet1);
 	//freeUpMemory(&puzzleSet2);
