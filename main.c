@@ -7,7 +7,8 @@
 #define MATH_E  2.7182818284
 #define MATH_SQRT_TWO 1.4142135623
 #define MATH_SQRT_THREE 1.7320508075
-#define NUMBER_OF_CUBES 11
+#define NUMBER_OF_SIDES 3
+#define NUMBER_OF_CUBES 100 
 
 typedef struct Side Side;
 
@@ -58,20 +59,17 @@ void generateCube(Cube** cubes, int size, int (*calculateFunction)(int)){
 	Cube* end = iterator + size;
 	unsigned sideIndex = 1;
 	for(end; iterator != end; ++iterator){
-		iterator->sides = malloc(sizeof(Side) * 3);
-
-		iterator->sides[0].color = (*calculateFunction)(sideIndex++);
-		//iterator->sides[0].taken = false;
-		iterator->sides[1].color = (*calculateFunction)(sideIndex++);
-		//iterator->sides[1].taken = false;
-		iterator->sides[2].color = (*calculateFunction)(sideIndex++);
-		//iterator->sides[2].taken = false;
+		iterator->sides = malloc(sizeof(Side) * NUMBER_OF_SIDES);
+		for(int i = 0; i < NUMBER_OF_SIDES; ++i){
+			iterator->sides[i].color = (*calculateFunction)(sideIndex++);
+			iterator->sides[i].taken = false;
+		}
 	}
 }	
 
 bool tryToSolvePuzzle(Cube* cubes, Cube* currentCube, Cube* end, int* colorArray){
 	if(currentCube == end){
-		for(int sideIndex = 0; sideIndex < 3; ++sideIndex){
+		for(int sideIndex = 0; sideIndex < NUMBER_OF_SIDES; ++sideIndex){
 			//printf("%d\n", colorArray[currentCube->sides[sideIndex].color - 1]);
 			if(!currentCube->sides[sideIndex].taken && colorArray[currentCube->sides[sideIndex].color - 1] == 0){
 				currentCube->sides[sideIndex].taken = true;
@@ -82,7 +80,7 @@ bool tryToSolvePuzzle(Cube* cubes, Cube* currentCube, Cube* end, int* colorArray
 		return false;
 	}
 	else{
-		for(int sideIndex = 0; sideIndex < 3; ++sideIndex){
+		for(int sideIndex = 0; sideIndex < NUMBER_OF_SIDES; ++sideIndex){
 			if(!currentCube->sides[sideIndex].taken && colorArray[currentCube->sides[sideIndex].color - 1] == 0){
 				currentCube->sides[sideIndex].taken = true;
 				colorArray[currentCube->sides[sideIndex].color - 1] = 1;
@@ -127,16 +125,16 @@ int main(){
 
 	printPuzzleSetToFile((Cube const*) puzzleSet1, "Puzzle 1", "cubes.txt", "w");
 	printf("Puzzle 1 solvable: %d\n", tryToSolvePuzzle(puzzleSet1, puzzleSet1, puzzleSet1 + NUMBER_OF_CUBES - 1, colorArray));
-
+	/*
 	for(Cube* iterator = puzzleSet1; iterator != puzzleSet1 + NUMBER_OF_CUBES; ++iterator){
-		for(int i = 0; i < 3; ++i){
+		for(int i = 0; i < NUMBER_OF_SIDES; ++i){
 			if(iterator->sides[i].taken){
 				printf("%d\n", iterator->sides[i].color);
 				break;
 			}	
 		}
 	}
-
+	*/
 	freeUpMemory(&puzzleSet1);
 	//freeUpMemory(&puzzleSet2);
 	//freeUpMemory(&puzzleSet3);

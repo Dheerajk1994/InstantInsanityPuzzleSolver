@@ -1,3 +1,3 @@
 projmake: main.c
-	gcc main.c
-	./a
+	gcc main.c -lm
+	./a.out
