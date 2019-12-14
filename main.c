@@ -111,6 +111,22 @@ void freeUpMemory(Cube** cubes){
 	free(*cubes);
 }
 
+bool* getCubesWithRepeatingColors(Cube* cubes, int cubeSetSize){
+	bool* resultArray = (bool*)calloc(cubeSetSize, sizeof(bool));
+	//TODO this only assumes that you have 3 sides
+	//will need adjustments if more than 3 sides are introduced
+	int side1Col = 0, side2Col = 0, side3Col = 0;
+	for(int i = 0; i < cubeSetSize; ++i){
+		side1Col = (cubes + i)->sides[0].color;		
+		side2Col = (cubes + i)->sides[1].color;		
+		side3Col = (cubes + i)->sides[2].color;		
+		if(side1Col == side2Col || side2Col == side3Col || side1Col == side3Col){
+			resultArray[i] = true;
+		}
+	}
+	return resultArray;
+}
+
 bool* getCubesWithThisColor(Cube* cubes, int cubeSetSize, int color){
 	bool* resultArray = (bool*)calloc(cubeSetSize, sizeof(bool));
 	int counter = 0;
@@ -136,7 +152,7 @@ int* countColorOccurence(Cube* cubes){
 		}
 	}
 	for(int i = 0; i < MAX_COLOR_RANGE; ++i){
-		printf("Color  %d : \t%d times\n", i + 1, *(colorOccurenceArray + i));	
+		//printf("Color  %d : \t%d times\n", i + 1, *(colorOccurenceArray + i));	
 	}
 	return colorOccurenceArray;
 }
@@ -144,17 +160,32 @@ int* countColorOccurence(Cube* cubes){
 void findPotentialMinObst(Cube* cubes, int cubeSetSize){
 	int* colorOccurenceArray = countColorOccurence(cubes);
 	bool* potentialConflictCubes = NULL;
+	bool* potentialColorRepeatsCubes = NULL;
+
+	//POTENTIAL COLOR REPEATS IN SAME CUBE
+	printf("Cubes with repeating colors:\n");
+	potentialColorRepeatsCubes = getCubesWithRepeatingColors(cubes, cubeSetSize);
+	for(int i = 0; i < cubeSetSize; ++i){
+		if(potentialColorRepeatsCubes[i] == true){
+			printf("Colors repeat on cube: %d\n", i + 1);
+		}
+	}
+	
+	//COLORS THAT APPEAR MORE THAN THREE TIMES
 	for(int i = 0; i < MAX_COLOR_RANGE; ++i){
 		if(colorOccurenceArray[i] > 3){
 			potentialConflictCubes = getCubesWithThisColor(cubes, cubeSetSize, i + 1); 
-			break;
+
+			printf("A min obstacle - with color %d appearing more than  3 times\n", i);
+			for(int i = 0; i < cubeSetSize; ++i){
+				if(potentialConflictCubes[i] == true){
+					printf("cube: %d\n", i + 1);
+				}
+			}
+			//break;
 		}
 	}
-	for(int i = 0; i < cubeSetSize; ++i){
-		if(potentialConflictCubes[i] == true){
-			printf("cube: %d\n", i + 1);
-		}
-	}
+	
 }
 
 
