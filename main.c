@@ -9,6 +9,7 @@
 #define MATH_SQRT_THREE 1.7320508075
 #define NUMBER_OF_SIDES 3
 #define NUMBER_OF_CUBES 100 
+#define MAX_COLOR_RANGE 100
 
 typedef struct Side Side;
 
@@ -22,19 +23,19 @@ typedef struct{
 }Cube;
 
 int puzzleOneColorCalculation(int sideIndex){
-	return 1 + ((int)floor(sideIndex * MATH_PI)% NUMBER_OF_CUBES);
+	return 1 + ((int)floor(sideIndex * MATH_PI)% MAX_COLOR_RANGE);
 }
 
 int puzzleTwoColorCalculation(int sideIndex){
-	return 1 + ((int)floor(sideIndex * MATH_E)% NUMBER_OF_CUBES);
+	return 1 + ((int)floor(sideIndex * MATH_E)% MAX_COLOR_RANGE);
 }
 
 int puzzleThreeColorCalculation(int sideIndex){
-	return 1 + ((int)floor(sideIndex * MATH_SQRT_TWO)% NUMBER_OF_CUBES);
+	return 1 + ((int)floor(sideIndex * MATH_SQRT_TWO)% MAX_COLOR_RANGE);
 }
 
 int puzzleFourColorCalculation(int sideIndex){
-	return 1 + ((int)floor(sideIndex * MATH_SQRT_THREE)% NUMBER_OF_CUBES);
+	return 1 + ((int)floor(sideIndex * MATH_SQRT_THREE)% MAX_COLOR_RANGE);
 }
 
 void printPuzzleSetToFile(const Cube* cubes, char* puzzleName, char* fileName, char* readWriteState){
@@ -99,6 +100,7 @@ int* createColorArray(int size){
 	int* array = (int*)calloc(size, sizeof(int));
 	return array;
 }
+
 void freeUpMemory(Cube** cubes){
 	Cube* cubeIterator = *cubes;
 	Cube* end = cubeIterator + NUMBER_OF_CUBES; 
@@ -109,36 +111,64 @@ void freeUpMemory(Cube** cubes){
 	free(*cubes);
 }
 
-
-int main(){
-	Cube* puzzleSet1 = NULL;
-	//Cube* puzzleSet2 = NULL;
-	//Cube* puzzleSet3 = NULL;
-	//Cube* puzzleSet4 = NULL;
- 	
-	int* colorArray = createColorArray(NUMBER_OF_CUBES);
-	
- 	generateCube(&puzzleSet1, NUMBER_OF_CUBES, puzzleOneColorCalculation);	
-	//generateCube(&puzzleSet2, "Puzzle 2", puzzleTwoColorCalculation);
-	//generateCube(&puzzleSet3, "Puzzle 3", puzzleThreeColorCalculation);
-	//generateCube(&puzzleSet4, "Puzzle 4", puzzleFourColorCalculation);
-
-	printPuzzleSetToFile((Cube const*) puzzleSet1, "Puzzle 1", "cubes.txt", "w");
-	printf("Puzzle 1 solvable: %d\n", tryToSolvePuzzle(puzzleSet1, puzzleSet1, puzzleSet1 + NUMBER_OF_CUBES - 1, colorArray));
-	/*
-	for(Cube* iterator = puzzleSet1; iterator != puzzleSet1 + NUMBER_OF_CUBES; ++iterator){
+bool* getCubesWithThisColor(Cube* cubes, int cubeSetSize, int color){
+	bool* resultArray = (bool*)calloc(cubeSetSize, sizeof(bool));
+	int counter = 0;
+	for(counter; counter < cubeSetSize; ++counter){
 		for(int i = 0; i < NUMBER_OF_SIDES; ++i){
-			if(iterator->sides[i].taken){
-				printf("%d\n", iterator->sides[i].color);
-				break;
+			if((cubes + counter)->sides[i].color == color){
+				*(resultArray + counter) = true;
 			}	
 		}
 	}
-	*/
+	return resultArray;
+}
+
+int* countColorOccurence(Cube* cubes){
+	//array of MAX_COLOR_RANGE ints representing MAX_COLOR_RANGE possible colors
+	int* colorOccurenceArray = (int*)calloc(MAX_COLOR_RANGE, sizeof(int));
+	Cube* iterator = cubes;
+	Cube* end = iterator + NUMBER_OF_CUBES;
+
+	for(end; iterator != end; ++iterator){
+		for(int i = 0; i < NUMBER_OF_SIDES; ++i){
+			*(colorOccurenceArray + (iterator->sides[i].color - 1)) += 1;	
+		}
+	}
+	for(int i = 0; i < MAX_COLOR_RANGE; ++i){
+		printf("Color  %d : \t%d times\n", i + 1, *(colorOccurenceArray + i));	
+	}
+	return colorOccurenceArray;
+}
+
+void findPotentialMinObst(Cube* cubes, int cubeSetSize){
+	int* colorOccurenceArray = countColorOccurence(cubes);
+	bool* potentialConflictCubes = NULL;
+	for(int i = 0; i < MAX_COLOR_RANGE; ++i){
+		if(colorOccurenceArray[i] > 3){
+			potentialConflictCubes = getCubesWithThisColor(cubes, cubeSetSize, i + 1); 
+			break;
+		}
+	}
+	for(int i = 0; i < cubeSetSize; ++i){
+		if(potentialConflictCubes[i] == true){
+			printf("cube: %d\n", i + 1);
+		}
+	}
+}
+
+
+int main(){
+	Cube* puzzleSet1 = NULL;
+ 	
+	int* colorArray = createColorArray(NUMBER_OF_CUBES);
+ 	generateCube(&puzzleSet1, NUMBER_OF_CUBES, puzzleOneColorCalculation);	
+
+	printPuzzleSetToFile((Cube const*) puzzleSet1, "Puzzle 1", "cubes.txt", "w");
+	//printf("Puzzle 1 solvable: %d\n", tryToSolvePuzzle(puzzleSet1, puzzleSet1, puzzleSet1 + NUMBER_OF_CUBES - 1, colorArray));
+	findPotentialMinObst(puzzleSet1, NUMBER_OF_CUBES);
 	freeUpMemory(&puzzleSet1);
-	//freeUpMemory(&puzzleSet2);
-	//freeUpMemory(&puzzleSet3);
-	//freeUpMemory(&puzzleSet4);
+	
 	return 0;
 }
 
