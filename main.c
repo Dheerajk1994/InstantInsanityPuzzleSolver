@@ -54,6 +54,13 @@ void printPuzzleSetToFile(const Cube* cubes, char* puzzleName, char* fileName, c
 	fclose(outPutFile);
 }
 
+void printCubeColors(const Cube* cube){
+	for(int i = 0; i < NUMBER_OF_SIDES; ++i){
+		printf("%d ", cube->sides[i].color);
+	}
+	printf("\n");
+}
+
 void generateCube(Cube** cubes, int size, int (*calculateFunction)(int)){
 	*cubes = malloc(sizeof(Cube) * size);
 	Cube* iterator = *cubes;
@@ -71,7 +78,6 @@ void generateCube(Cube** cubes, int size, int (*calculateFunction)(int)){
 bool tryToSolvePuzzle(Cube* cubes, Cube* currentCube, Cube* end, int* colorArray){
 	if(currentCube == end){
 		for(int sideIndex = 0; sideIndex < NUMBER_OF_SIDES; ++sideIndex){
-			//printf("%d\n", colorArray[currentCube->sides[sideIndex].color - 1]);
 			if(!currentCube->sides[sideIndex].taken && colorArray[currentCube->sides[sideIndex].color - 1] == 0){
 				currentCube->sides[sideIndex].taken = true;
 				colorArray[currentCube->sides[sideIndex].color - 1] = 1;
@@ -94,6 +100,7 @@ bool tryToSolvePuzzle(Cube* cubes, Cube* currentCube, Cube* end, int* colorArray
 		}
 		return false;
 	}
+	return false;
 } 
 
 int* createColorArray(int size){
@@ -101,14 +108,27 @@ int* createColorArray(int size){
 	return array;
 }
 
-void freeUpMemory(Cube** cubes){
+void freeUpMemory(Cube** cubes, int cubeSetSize){
 	Cube* cubeIterator = *cubes;
-	Cube* end = cubeIterator + NUMBER_OF_CUBES; 
+	Cube* end = cubeIterator + cubeSetSize; 
 	
 	for(end; cubeIterator != end; ++cubeIterator){
 		free(cubeIterator->sides);
 	}
 	free(*cubes);
+}
+
+bool* getCubesThatHaveDecreasingColors(Cube* cubes, int cubeSetSize){
+	bool* resultArray = (bool*)calloc(cubeSetSize, sizeof(bool));
+	for(int i = 0; i < cubeSetSize; ++i){
+		int side1 = (cubes+i)->sides[0].color;	
+		int side2 = (cubes+i)->sides[1].color;	
+		int side3 = (cubes+i)->sides[2].color;	
+
+		if(side1 < side2 && side2 < side3){
+			resultArray[i] = true;
+		}
+	}
 }
 
 bool* getCubesWithRepeatingColors(Cube* cubes, int cubeSetSize){
@@ -157,6 +177,15 @@ int* countColorOccurence(Cube* cubes){
 	return colorOccurenceArray;
 }
 
+Cube* getCopyOfCube(Cube* cube){
+	Cube* copy;
+	for(int i = 0; i < NUMBER_OF_SIDES; ++i){
+		copy->sides[i].color = cube->sides[i].color;	
+	}
+	return copy;
+}
+
+
 void findPotentialMinObst(Cube* cubes, int cubeSetSize){
 	int* colorOccurenceArray = countColorOccurence(cubes);
 	bool* potentialConflictCubes = NULL;
@@ -176,29 +205,51 @@ void findPotentialMinObst(Cube* cubes, int cubeSetSize){
 		if(colorOccurenceArray[i] > 3){
 			potentialConflictCubes = getCubesWithThisColor(cubes, cubeSetSize, i + 1); 
 
-			printf("A min obstacle - with color %d appearing more than  3 times\n", i);
+			printf("A min obstacle - with color %d appearing more than  3 times\n", i + 1);
 			for(int i = 0; i < cubeSetSize; ++i){
 				if(potentialConflictCubes[i] == true){
-					printf("cube: %d\n", i + 1);
+					printf("cube: %d\tcolors:\t", i + 1);
+					printCubeColors(cubes + i);
 				}
 			}
 			//break;
 		}
 	}
-	
 }
-
 
 int main(){
 	Cube* puzzleSet1 = NULL;
+	Cube* puzzleSet2 = NULL;
+	Cube* puzzleSet3 = NULL;
+	Cube* puzzleSet4 = NULL;
  	
 	int* colorArray = createColorArray(NUMBER_OF_CUBES);
- 	generateCube(&puzzleSet1, NUMBER_OF_CUBES, puzzleOneColorCalculation);	
 
-	printPuzzleSetToFile((Cube const*) puzzleSet1, "Puzzle 1", "cubes.txt", "w");
+ 	generateCube(&puzzleSet1, NUMBER_OF_CUBES, puzzleOneColorCalculation);	
+ 	generateCube(&puzzleSet2, NUMBER_OF_CUBES, puzzleTwoColorCalculation);	
+ 	generateCube(&puzzleSet3, NUMBER_OF_CUBES, puzzleThreeColorCalculation);	
+ 	generateCube(&puzzleSet4, NUMBER_OF_CUBES, puzzleFourColorCalculation);	
+
+	printPuzzleSetToFile((Cube const*) puzzleSet1, "Puzzle 1", "cubes.txt", "a");
+	printPuzzleSetToFile((Cube const*) puzzleSet2, "Puzzle 2", "cubes.txt", "a");
+	printPuzzleSetToFile((Cube const*) puzzleSet3, "Puzzle 3", "cubes.txt", "a");
+	printPuzzleSetToFile((Cube const*) puzzleSet4, "Puzzle 4", "cubes.txt", "a");
+
+
 	//printf("Puzzle 1 solvable: %d\n", tryToSolvePuzzle(puzzleSet1, puzzleSet1, puzzleSet1 + NUMBER_OF_CUBES - 1, colorArray));
+	printf("\n\n\nPuzzle 1\n");
 	findPotentialMinObst(puzzleSet1, NUMBER_OF_CUBES);
-	freeUpMemory(&puzzleSet1);
+	printf("\n\n\nPUzzle 2\n");
+	findPotentialMinObst(puzzleSet2, NUMBER_OF_CUBES);
+	printf("\n\n\nPUzzle 3\n");
+	findPotentialMinObst(puzzleSet3, NUMBER_OF_CUBES);
+	printf("\n\n\nPUzzle 4\n");
+	findPotentialMinObst(puzzleSet4, NUMBER_OF_CUBES);
+
+	freeUpMemory(&puzzleSet1, NUMBER_OF_CUBES);
+	freeUpMemory(&puzzleSet2, NUMBER_OF_CUBES);
+	freeUpMemory(&puzzleSet3, NUMBER_OF_CUBES);
+	freeUpMemory(&puzzleSet4, NUMBER_OF_CUBES);
 	
 	return 0;
 }
